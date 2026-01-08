@@ -13,7 +13,8 @@ CORS(app)
 
 client = OpenAI(
     api_key='sk-018076cf6ec64e018af8c59d96f963bd',
-    base_url="https://api.deepseek.com")
+    base_url="https://api.deepseek.com"
+)
 
 @app.route('/')
 def index():
