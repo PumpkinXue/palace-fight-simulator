@@ -1514,6 +1514,7 @@ def generate_heartroom_event():
 
         raw_content = response.choices[0].message.content
         event_data = json.loads(raw_content)
+        print(event_data)
 
         return jsonify({"success": True, "event": event_data})
 
