@@ -5,14 +5,15 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from openai import OpenAI
 import json
+import random
 import requests.exceptions
 
 app = Flask('ai_studio_code')
 CORS(app)
 
 client = OpenAI(
-    api_key='sk-018076cf6ec64e018af8c59d96f963bd',
-    base_url="https://api.deepseek.com")
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),  # 自定义环境变量名
+    base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")  # 设默认值)
 
 @app.route('/')
 def index():
