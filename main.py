@@ -2081,13 +2081,6 @@ def generate_location_event():
             "error": str(e)
         })
 
-# 提供前端页面访问
-@app.route('/')
-def index():
-    with open('ai_studio_code.html', 'r', encoding='utf-8') as f:
-        return f.read()
-# 可以删除 process_player_choice 端点，因为不再需要
-
 
 # ========== 复制这段代码到app.py最后面 ==========
 import threading
