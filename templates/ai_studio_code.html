@@ -161,6 +161,51 @@
         .bg-purple-50 .font-bold {
             color: #6d28d9;
         }
+
+        /* 在现有样式中添加 */
+        .tab-confidant {
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        .tab-confidant.active {
+            color: #8B4513;
+            border-bottom: 2px solid #8B4513;
+        }
+        .tab-confidant-content {
+            display: none;
+        }
+        .tab-confidant-content.block {
+            display: block;
+        }
+        
+        /* 太医卡片样式 */
+        .doctor-task-card {
+            transition: all 0.3s ease;
+        }
+        .doctor-task-card.expanded {
+            background-color: #f9f7f2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* 任务状态标签样式 */
+        .task-tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        .task-idle {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .task-nurturing {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .task-poisoning {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-2 md:p-6 overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')]">
@@ -431,6 +476,10 @@
                             <span id="ui-player-name" class="text-xl font-ancient text-[#DAA520]">玩家名</span>
                             <span id="ui-player-rank" class="text-xs bg-[#8B0000] px-2 py-0.5 rounded">位份</span>
                             <span id="ui-player-grade" class="text-xs text-stone-400">品级</span>
+                            <!-- 新增：银两显示 -->
+                            <span id="ui-money" class="text-xs bg-yellow-600 text-white px-2 py-0.5 rounded">0两</span>
+                            <!-- 新增：亲信按钮 -->
+                            <button onclick="showConfidantSystem()" class="text-xs bg-[#4a5568] text-white px-2 py-0.5 rounded hover:bg-[#2d3748]">亲信</button>
                         </div>
 
                         <!-- 右侧：时间与功能按钮容器 -->
@@ -974,6 +1023,74 @@
         </div>
     </div>
 
+    <!-- 在现有模态框后面添加亲信系统模态框 -->
+    <div id="confidant-modal" class="hidden fixed inset-0 z-[400] modal-bg flex items-center justify-center p-4">
+        <div class="bg-silk w-full max-w-lg max-h-[85vh] rounded-lg shadow-2xl flex flex-col border-[3px] border-[#5c3a3a] relative">
+            <div class="p-4 border-b-2 border-[#d6cbb0] flex justify-between items-center bg-[#fcfaf2]">
+                <h2 class="font-ancient text-2xl text-[#8B0000]">亲信系统</h2>
+                <button onclick="closeConfidantModal()" class="text-stone-500 hover:text-red-900 text-3xl font-bold">&times;</button>
+            </div>
+
+            <!-- 标签栏 -->
+            <div class="flex bg-[#e9d8c7] border-b border-[#d4b996]">
+                <button onclick="showConfidantTab('palace')" class="tab-confidant active flex-1 py-2 font-bold text-[#5a3e36] border-b-2 border-[#8B4513]">宫侍</button>
+                <button onclick="showConfidantTab('doctors')" class="tab-confidant flex-1 py-2 font-bold text-[#8b7355]">太医</button>
+            </div>
+
+            <!-- 内容区域 -->
+            <div id="confidant-content" class="p-4 overflow-y-auto flex-grow text-stone-800 text-sm">
+                <!-- 宫侍标签页 -->
+                <div id="confidant-palace" class="tab-confidant-content block">
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">🏗️</div>
+                        <p class="text-lg font-bold text-[#8B0000]">内务府建立中...</p>
+                        <p class="text-sm text-stone-500 mt-2">宫侍系统正在筹备，请耐心等待</p>
+                    </div>
+                </div>
+
+                <!-- 太医标签页 -->
+                <div id="confidant-doctors" class="tab-confidant-content hidden space-y-4">
+                    <!-- 太医列表将通过JS动态生成 -->
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-[#d6cbb0] bg-[#fcfaf2] flex justify-between items-center">
+                <div class="text-xs text-stone-500">当前银两：<span id="confidant-money" class="font-bold text-yellow-600">0</span>两</div>
+                <button onclick="closeConfidantModal()" class="btn-palace px-6 py-1 text-sm">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增：妃嫔选择弹窗（用于派遣调理/下毒） -->
+    <div id="concubine-select-modal" class="hidden fixed inset-0 z-[500] modal-bg flex items-center justify-center p-4">
+        <div class="bg-silk w-full max-w-md max-h-[70vh] rounded-lg shadow-2xl flex flex-col border-[3px] border-[#5c3a3a] relative">
+            <div class="p-4 border-b-2 border-[#d6cbb0] flex justify-between items-center bg-[#fcfaf2]">
+                <h2 id="concubine-select-title" class="font-bold text-lg text-[#8B0000]">选择目标</h2>
+                <button onclick="closeConcubineSelectModal()" class="text-stone-500 hover:text-red-900 text-2xl">&times;</button>
+            </div>
+            <div id="concubine-select-list" class="p-4 overflow-y-auto flex-grow space-y-2">
+                <!-- 妃嫔列表将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增：下毒任务确认弹窗 -->
+    <div id="poison-confirm-modal" class="hidden fixed inset-0 z-[500] modal-bg flex items-center justify-center p-4">
+        <div class="bg-silk w-full max-w-md rounded-lg shadow-2xl flex flex-col border-[3px] border-[#8B0000] relative">
+            <div class="p-4 border-b-2 border-[#d6cbb0] flex justify-between items-center bg-[#fcfaf2]">
+                <h2 class="font-bold text-lg text-[#8B0000]">派遣下毒</h2>
+                <button onclick="closePoisonConfirmModal()" class="text-stone-500 hover:text-red-900 text-2xl">&times;</button>
+            </div>
+            <div id="poison-confirm-content" class="p-4">
+                <!-- 内容将通过JS动态生成 -->
+            </div>
+            <div class="p-4 border-t border-[#d6cbb0] bg-[#fcfaf2] flex justify-end gap-2">
+                <button onclick="closePoisonConfirmModal()" class="bg-gray-500 text-white px-4 py-1 rounded">取消</button>
+                <button onclick="confirmPoisonTask()" id="confirm-poison-btn" class="btn-palace px-4 py-1">确认派遣</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 位分等级映射表（与后端保持一致）
         const RANK_LEVELS = {
@@ -1243,6 +1360,10 @@
             } else {
                 draftDiv.classList.add('hidden');
             }
+
+            // 新增：更新银两显示
+            const money = gameState.玩家详细信息.银两 || 0;
+            document.getElementById('ui-money').textContent = `${money}两`;
         }
 
         async function visitLocation(locationName) {
@@ -1271,6 +1392,7 @@
             document.getElementById('event-loading').classList.remove('hidden');
 
             gameState.action_points--;
+            afterActionPointConsumed()
             showAILoading(); // 【注入】
 
             try {
@@ -1500,6 +1622,12 @@
             document.getElementById('summary-month').textContent = endingMonth;
             document.getElementById('summary-loading').classList.remove('hidden');
             document.getElementById('summary-content').classList.add('hidden');
+
+            // 在调用月终总结前，先处理太医任务（调理）
+            processDoctorTasks(false);
+
+            // 处理中毒事件（在月终总结显示前）
+            processPoisonEventsInSummary();
 
             let progress = 0;
             const progressInterval = setInterval(() => {
@@ -1737,6 +1865,7 @@
         function closeSummary() {
             // 更新所有人的资历
             updateSeniorityForAll();
+            calculateMonthlyMoney();
             gameState.current_month++;
             if (gameState.current_month > 12) {
                 gameState.current_month = 1;
@@ -1953,6 +2082,8 @@
             document.getElementById('step-waiting').classList.add('hidden');
             document.getElementById('main-game-screen').classList.remove('hidden');
             document.getElementById('title').innerText = "后宫浮生";
+            // 新增：初始化兼容性
+            initializeCompatibility();
             updateUI();
             autoSaveToSlot5(); // 自动存档到5号位
         }
@@ -2044,6 +2175,8 @@
             
             const p = JSON.parse(data);
             gameState = p.gameState;
+
+            initializeCompatibility();
 
             // ======== 新增：初始化可能缺失的字段（为了兼容旧存档）========
             // 初始化太医列表（如果存档中没有这个字段）
@@ -2311,6 +2444,7 @@
         function selectRandomVisit() {
             // 扣减行动点
             gameState.action_points--;
+            afterActionPointConsumed()
 
             // 直接调用原生的visitLocation函数，但传入"六宫"作为地点
             // 这将使用原有的事件生成逻辑
@@ -2383,6 +2517,7 @@
 
             // 扣减行动点
             gameState.action_points--;
+            afterActionPointConsumed()
 
             // 切换到事件界面
             switchScreen('step-event');
@@ -2568,6 +2703,7 @@
 
             // 扣减行动点
             gameState.action_points--;
+            afterActionPointConsumed()
 
             // 增加求见次数
             gameState.heartroom_visits_this_month++;
@@ -3371,6 +3507,7 @@
             }
 
             gameState.action_points--;
+            afterActionPointConsumed()
 
             // 随机增加健康值和体力值
             const healthIncrease = Math.floor(Math.random() * 6); // 0-5
@@ -3415,6 +3552,7 @@
             const medicineIncrease = Math.floor(Math.random() * 4); // 0-3
 
             gameState.action_points--;
+            afterActionPointConsumed()
 
             // 应用属性变动
             gameState.玩家详细信息.各项属性.医术 += medicineIncrease;
@@ -3502,6 +3640,7 @@
                 hideAILoading();
                 if (data.success) {
                     gameState.action_points--;
+                    afterActionPointConsumed()
                     displayHospitalEventResult(data.event);
                 } else {
                     alert("生成太医院事件失败");
@@ -3545,6 +3684,7 @@
                 hideAILoading();
                 if (data.success) {
                     gameState.action_points--;
+                    afterActionPointConsumed()
                     displayHospitalEventResult(data.event, true);
                 } else {
                     alert("请教医术失败");
@@ -3588,6 +3728,7 @@
                 hideAILoading();
                 if (data.success) {
                     gameState.action_points--;
+                    afterActionPointConsumed()
                     displayHospitalEventResult(data.event, true);
                 } else {
                     alert("拉拢太医失败");
@@ -3631,6 +3772,7 @@
                 hideAILoading();
                 if (data.success) {
                     gameState.action_points--;
+                    afterActionPointConsumed()
                     displayHospitalEventResult(data.event, true);
                 } else {
                     alert("挑拨离间失败");
@@ -3754,6 +3896,661 @@
                     if (confirm("本月行动点已用尽，是否直接进入下个月？")) passMonth();
                 }, 500);
             }
+        }
+
+        // === 全局变量 ===
+        let confidantData = {
+            selectedDoctor: null,
+            selectedTask: null,
+            selectedTarget: null
+        };
+
+        // === 亲信系统功能 ===
+        function showConfidantSystem() {
+            document.getElementById('confidant-modal').classList.remove('hidden');
+            showConfidantTab('palace');
+            updateConfidantUI();
+        }
+
+        function closeConfidantModal() {
+            document.getElementById('confidant-modal').classList.add('hidden');
+        }
+
+        function showConfidantTab(tabId) {
+            // 更新标签页
+            document.querySelectorAll('.tab-confidant').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.borderBottom = 'none';
+            });
+            document.querySelectorAll('.tab-confidant-content').forEach(content => {
+                content.classList.remove('block');
+                content.classList.add('hidden');
+            });
+
+            // 激活选中的标签
+            document.querySelector(`.tab-confidant:nth-child(${tabId === 'palace' ? 1 : 2})`).classList.add('active');
+            document.getElementById(`confidant-${tabId}`).classList.remove('hidden');
+            document.getElementById(`confidant-${tabId}`).classList.add('block');
+
+            // 如果切换到太医标签页，更新列表
+            if (tabId === 'doctors') {
+                updateDoctorsList();
+            }
+        }
+
+        // === 更新亲信系统UI ===
+        function updateConfidantUI() {
+            // 更新银两显示
+            const money = gameState.玩家详细信息.银两 || 0;
+            document.getElementById('confidant-money').textContent = money;
+
+            // 更新太医列表（如果太医标签页是打开的）
+            if (!document.getElementById('confidant-doctors').classList.contains('hidden')) {
+                updateDoctorsList();
+            }
+        }
+
+        // === 更新太医列表 ===
+        function updateDoctorsList() {
+            const doctorsContainer = document.getElementById('confidant-doctors');
+            doctorsContainer.innerHTML = '';
+
+            // 获取已听命于玩家的太医
+            const playerDoctors = gameState.太医列表.filter(doctor => 
+                doctor.听命于 === gameState.玩家详细信息.姓名
+            );
+
+            if (playerDoctors.length === 0) {
+                doctorsContainer.innerHTML = `
+                    <div class="text-center py-8 text-stone-500">
+                        <div class="text-4xl mb-2">🫥</div>
+                        <p>暂无听命于你的太医</p>
+                        <p class="text-xs mt-1">前往太医院拉拢太医吧</p>
+                    </div>`;
+                return;
+            }
+
+            playerDoctors.forEach(doctor => {
+                const card = document.createElement('div');
+                card.className = 'doctor-task-card bg-white border border-gray-200 rounded-lg p-3 mb-2';
+                card.innerHTML = generateDoctorCardHTML(doctor);
+                doctorsContainer.appendChild(card);
+
+                // 添加点击展开事件
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('.doctor-action-btn')) {
+                        toggleDoctorCard(card, doctor);
+                    }
+                });
+            });
+        }
+
+        // === 生成太医卡片HTML ===
+        function generateDoctorCardHTML(doctor, expanded = false) {
+            const task = doctor.当前任务 || { 类型: '空闲', 目标: null, 剩余行动点: 0 };
+            const taskText = getTaskText(doctor);
+
+            return `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="text-xl mr-3">👨‍⚕️</div>
+                        <div>
+                            <div class="font-bold">${doctor.姓名}</div>
+                            <div class="text-xs text-gray-500">${doctor.品级} | 医术：${doctor.医术值}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="task-tag ${getTaskClass(task.类型)}">${task.类型}</span>
+                        <span class="text-gray-400">${expanded ? '▲' : '▼'}</span>
+                    </div>
+                </div>
+                ${expanded ? `
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <div class="text-xs text-gray-600 mb-2">${taskText}</div>
+                    <div class="flex gap-2">
+                        ${task.类型 === '空闲' ? `
+                        <button onclick="assignNurtureTask('${doctor.姓名}')" class="doctor-action-btn flex-1 bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded">
+                            派遣调理
+                        </button>
+                        <button onclick="assignPoisonTask('${doctor.姓名}')" class="doctor-action-btn flex-1 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded">
+                            派遣下毒
+                        </button>
+                        ` : `
+                        <button onclick="recallDoctor('${doctor.姓名}')" class="doctor-action-btn w-full bg-gray-600 hover:bg-gray-700 text-white text-xs px-2 py-1 rounded">
+                            召回
+                        </button>
+                        `}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // === 其他辅助函数 ===
+        function getTaskClass(taskType) {
+            switch(taskType) {
+                case '调理': return 'task-nurturing';
+                case '下毒': return 'task-poisoning';
+                default: return 'task-idle';
+            }
+        }
+
+        function getTaskText(doctor) {
+            const task = doctor.当前任务 || { 类型: '空闲', 目标: null, 剩余行动点: 0 };
+
+            switch(task.类型) {
+                case '调理':
+                    return `正在调理${task.目标}，每月健康值+${task.效果 || '0~5'}点`;
+                case '下毒':
+                    return `正在找机会对${task.目标}下手，剩余${task.剩余行动点}个行动点`;
+                default:
+                    return '空闲中，可派遣任务';
+            }
+        }
+
+        function toggleDoctorCard(card, doctor) {
+            const isExpanded = card.classList.contains('expanded');
+
+            if (isExpanded) {
+                card.classList.remove('expanded');
+                card.innerHTML = generateDoctorCardHTML(doctor, false);
+            } else {
+                card.classList.add('expanded');
+                card.innerHTML = generateDoctorCardHTML(doctor, true);
+            }
+        }
+
+        // === 派遣调理任务 ===
+        function assignNurtureTask(doctorName) {
+            event.stopPropagation(); // 阻止事件冒泡
+
+            confidantData.selectedDoctor = doctorName;
+            confidantData.selectedTask = '调理';
+
+            // 显示妃嫔选择弹窗（包括玩家自己）
+            showConcubineSelectModal(true);
+        }
+
+        // === 派遣下毒任务 ===
+        function assignPoisonTask(doctorName) {
+            event.stopPropagation(); // 阻止事件冒泡
+
+            confidantData.selectedDoctor = doctorName;
+            confidantData.selectedTask = '下毒';
+
+            // 显示妃嫔选择弹窗（不包括玩家自己）
+            showConcubineSelectModal(false);
+
+            // 或者直接显示下毒确认弹窗（带概率计算）
+            // showPoisonConfirmModal(doctorName);
+        }
+
+        // === 显示妃嫔选择弹窗 ===
+        function showConcubineSelectModal(includeSelf = true) {
+            const modal = document.getElementById('concubine-select-modal');
+            const title = document.getElementById('concubine-select-title');
+            const list = document.getElementById('concubine-select-list');
+
+            title.textContent = confidantData.selectedTask === '调理' ? '选择调理目标' : '选择下毒目标';
+            list.innerHTML = '';
+
+            // 添加玩家自己（如果是调理任务）
+            if (includeSelf && confidantData.selectedTask === '调理') {
+                const selfItem = document.createElement('div');
+                selfItem.className = 'p-2 border border-gray-200 rounded cursor-pointer hover:bg-gray-50';
+                selfItem.innerHTML = `
+                    <div class="font-bold">${gameState.玩家详细信息.姓名}（自己）</div>
+                    <div class="text-xs text-gray-500">健康值：${gameState.玩家详细信息.各项属性.健康 || 100}</div>
+                `;
+                selfItem.onclick = () => selectTarget(gameState.玩家详细信息.姓名, true);
+                list.appendChild(selfItem);
+            }
+
+            // 添加其他妃嫔
+            gameState.妃嫔信息.forEach(concubine => {
+                if (!concubine.已消亡) {
+                    const item = document.createElement('div');
+                    item.className = 'p-2 border border-gray-200 rounded cursor-pointer hover:bg-gray-50';
+                    item.innerHTML = `
+                        <div class="font-bold">${concubine.姓名}</div>
+                        <div class="text-xs text-gray-500">
+                            ${concubine.位分} | 健康：${concubine.健康值 || 100} | 权势：${concubine.权势}
+                        </div>
+                    `;
+                    item.onclick = () => selectTarget(concubine.姓名, false);
+                    list.appendChild(item);
+                }
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeConcubineSelectModal() {
+            document.getElementById('concubine-select-modal').classList.add('hidden');
+        }
+
+        function selectTarget(targetName, isSelf) {
+            confidantData.selectedTarget = targetName;
+
+            if (confidantData.selectedTask === '调理') {
+                assignTaskToDoctor();
+            } else if (confidantData.selectedTask === '下毒') {
+                // 显示下毒确认弹窗（带概率计算）
+                showPoisonConfirmModal();
+            }
+
+            closeConcubineSelectModal();
+        }
+
+        // === 下毒确认弹窗 ===
+        function showPoisonConfirmModal() {
+            const doctor = gameState.太医列表.find(d => d.姓名 === confidantData.selectedDoctor);
+            const target = confidantData.selectedTarget === gameState.玩家详细信息.姓名 ? 
+                gameState.玩家详细信息 : 
+                gameState.妃嫔信息.find(c => c.姓名 === confidantData.selectedTarget);
+
+            // 计算概率
+            const successRate = calculatePoisonSuccessRate(doctor, target);
+            const discoveryRate = calculatePoisonDiscoveryRate(doctor, target);
+
+            const content = document.getElementById('poison-confirm-content');
+            content.innerHTML = `
+                <div class="space-y-3">
+                    <p><strong>太医：</strong>${doctor.姓名}（医术：${doctor.医术值}）</p>
+                    <p><strong>目标：</strong>${target.姓名}（权势：${target.权势 || 0}）</p>
+                    <p><strong>你的心机：</strong>${gameState.玩家详细信息.各项属性.心机}</p>
+                    <p><strong>你的圣宠：</strong>${gameState.初始好感度信息["皇上"] || 0}</p>
+                    <div class="bg-red-50 p-3 rounded border border-red-200">
+                        <p class="font-bold text-red-800">📊 概率分析：</p>
+                        <p>• 下毒成功概率：<span class="font-bold">${successRate}%</span></p>
+                        <p>• 被发现概率：<span class="font-bold">${discoveryRate}%</span></p>
+                        <p class="text-xs text-red-600 mt-1">* 任务消耗：10两银子（每行动点）</p>
+                    </div>
+                    <p class="text-xs text-gray-500">派遣后，太医将开始寻找机会，每消耗一个行动点尝试一次下毒</p>
+                </div>
+            `;
+
+            // 检查银两是否足够
+            const money = gameState.玩家详细信息.银两 || 0;
+            const confirmBtn = document.getElementById('confirm-poison-btn');
+            if (money < 50) {
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '银两不足（需10两）';
+                confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '确认派遣';
+                confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            document.getElementById('poison-confirm-modal').classList.remove('hidden');
+        }
+
+        function closePoisonConfirmModal() {
+            document.getElementById('poison-confirm-modal').classList.add('hidden');
+        }
+
+        function confirmPoisonTask() {
+            assignTaskToDoctor();
+            closePoisonConfirmModal();
+        }
+
+        // === 计算下毒成功率 ===
+        function calculatePoisonSuccessRate(doctor, target) {
+            // 权重：心机(40%) > 权势(30%) > 医术(20%) > 圣宠(10%)
+            const playerCunning = gameState.玩家详细信息.各项属性.心机 || 0;
+            const targetPower = target.权势 || 0;
+            const doctorSkill = doctor.医术值 || 0;
+            const emperorFavor = gameState.初始好感度信息["皇上"] || 0;
+
+            // 归一化到0-100
+            const cunningScore = playerCunning;
+            const powerScore = 100 - targetPower; // 对方权势越高，成功率越低
+            const skillScore = doctorSkill;
+            const favorScore = (emperorFavor + 50) / 1.5; // 圣宠有正负，需要处理
+
+            // 加权计算
+            let successRate = 
+                (cunningScore * 0.4) + 
+                (powerScore * 0.3) + 
+                (skillScore * 0.2) + 
+                (Math.min(100, Math.max(0, favorScore)) * 0.1);
+
+            // 限制在5%-95%之间
+            successRate = Math.max(5, Math.min(95, Math.round(successRate)));
+
+            return successRate;
+        }
+
+        // === 计算被发现率 ===
+        function calculatePoisonDiscoveryRate(doctor, target) {
+            const playerCunning = gameState.玩家详细信息.各项属性.心机 || 0;
+            const targetPower = target.权势 || 0;
+            const doctorSkill = doctor.医术值 || 0;
+
+            // 权重：权势(50%) > 心机(30%) > 医术(20%)
+            let discoveryRate = 
+                (targetPower * 0.5) + 
+                ((100 - playerCunning) * 0.3) + 
+                ((100 - doctorSkill) * 0.2);
+
+            // 限制在10%-80%之间
+            discoveryRate = Math.max(10, Math.min(80, Math.round(discoveryRate)));
+
+            return discoveryRate;
+        }
+
+        // === 分配任务给太医 ===
+        function assignTaskToDoctor() {
+            const doctorIndex = gameState.太医列表.findIndex(d => d.姓名 === confidantData.selectedDoctor);
+            if (doctorIndex === -1) return;
+
+            const doctor = gameState.太医列表[doctorIndex];
+            const task = {
+                类型: confidantData.selectedTask,
+                目标: confidantData.selectedTarget,
+                开始时间: `${gameState.current_year}年${gameState.current_month}月`,
+                剩余行动点: confidantData.selectedTask === '下毒' ? 3 : 0, // 下毒任务有3次尝试机会
+                消耗银两: confidantData.selectedTask === '下毒' ? 10 : 5 // 调理每月5两，下毒每行动点10两
+            };
+
+            // 扣除银两
+            const currentMoney = gameState.玩家详细信息.银两 || 0;
+            gameState.玩家详细信息.银两 = currentMoney - task.消耗银两;
+
+            // 更新太医任务
+            doctor.当前任务 = task;
+            gameState.太医列表[doctorIndex] = doctor;
+
+            // 记录起居注
+            const taskType = confidantData.selectedTask === '调理' ? '调理' : '下毒';
+            const costText = confidantData.selectedTask === '调理' ? '5两' : '10两';
+            addMonthEvent(`派遣太医${doctor.姓名}对${confidantData.selectedTarget}进行${taskType}，消耗${costText}银子`);
+
+            // 更新UI
+            updateConfidantUI();
+            updateUI(); // 更新主界面银两显示
+
+            // 重置选择
+            confidantData = {
+                selectedDoctor: null,
+                selectedTask: null,
+                selectedTarget: null
+            };
+        }
+
+        // === 召回太医 ===
+        function recallDoctor(doctorName) {
+            event.stopPropagation();
+
+            if (!confirm('确定召回该太医？当前任务将中断。')) return;
+
+            const doctorIndex = gameState.太医列表.findIndex(d => d.姓名 === doctorName);
+            if (doctorIndex === -1) return;
+
+            const doctor = gameState.太医列表[doctorIndex];
+            const task = doctor.当前任务;
+
+            if (task) {
+                addMonthEvent(`召回太医${doctor.姓名}，中断对${task.目标}的${task.类型}任务`);
+            }
+
+            // 清除任务
+            doctor.当前任务 = null;
+            gameState.太医列表[doctorIndex] = doctor;
+
+            // 更新UI
+            updateConfidantUI();
+        }
+
+        // === 每月固定恢复银两 ===
+        function calculateMonthlyMoney() {
+            const rank = gameState.玩家详细信息.身份;
+            let baseMoney = 10; // 默认
+
+            // 根据位分映射表
+            if (rank.includes('皇后')) baseMoney = 500;
+            else if (rank.includes('皇贵妃')) baseMoney = 400;
+            else if (rank.includes('贵妃')) baseMoney = 300;
+            else if (rank.includes('妃')) baseMoney = 200;
+            else if (rank.includes('嫔')) baseMoney = 100;
+            else if (rank.includes('昭仪') || rank.includes('昭容') || rank.includes('昭媛')) baseMoney = 80;
+            else if (rank.includes('修仪') || rank.includes('修容') || rank.includes('修媛')) baseMoney = 60;
+            else if (rank.includes('充仪') || rank.includes('充容') || rank.includes('充媛')) baseMoney = 50;
+            else if (rank.includes('婕妤')) baseMoney = 40;
+            else if (rank.includes('贵人')) baseMoney = 30;
+            else if (rank.includes('美人')) baseMoney = 20;
+            else if (rank.includes('才人')) baseMoney = 15;
+            else if (rank.includes('常在')) baseMoney = 10;
+            else if (rank.includes('答应')) baseMoney = 5;
+            else if (rank.includes('官女子')) baseMoney = 2;
+
+            // 增加当前银两
+            const currentMoney = gameState.玩家详细信息.银两 || 0;
+            gameState.玩家详细信息.银两 = currentMoney + baseMoney;
+
+            addMonthEvent(`本月俸禄：${baseMoney}两银子`);
+        }
+
+        // === 处理太医任务（每月/每次行动点消耗时调用） ===
+        function processDoctorTasks(actionPointConsumed = false) {
+            gameState.太医列表.forEach((doctor, index) => {
+                const task = doctor.当前任务;
+                if (!task) return;
+
+                if (task.类型 === '调理') {
+                    // 调理任务：每月增加健康值
+                    if (!actionPointConsumed) { // 每月结束处理
+                        const target = task.目标 === gameState.玩家详细信息.姓名 ? 
+                            gameState.玩家详细信息 : 
+                            gameState.妃嫔信息.find(c => c.姓名 === task.目标);
+
+                        if (target) {
+                            const increase = Math.floor(Math.random() * 6); // 0-5点
+                            target.健康值 = (target.健康值 || 100) + increase;
+                            target.健康值 = Math.min(100, target.健康值);
+
+                            addMonthEvent(`太医${doctor.姓名}调理${task.目标}，健康值+${increase}`);
+
+                            // 扣除每月调理费用
+                            const currentMoney = gameState.玩家详细信息.银两 || 0;
+                            if (currentMoney >= 5) {
+                                gameState.玩家详细信息.银两 = currentMoney - 5;
+                                addMonthEvent(`支付太医${doctor.姓名}调理费用：5两`);
+                            } else {
+                                // 银两不足，自动召回
+                                addMonthEvent(`银两不足支付调理费用，太医${doctor.姓名}已自动召回`);
+                                doctor.当前任务 = null;
+                                gameState.太医列表[index] = doctor;
+                            }
+                        }
+                    }
+                } else if (task.类型 === '下毒') {
+                    // 下毒任务：每消耗行动点尝试一次
+                    if (actionPointConsumed && task.剩余行动点 > 0) {
+                        task.剩余行动点--;
+
+                        const target = gameState.妃嫔信息.find(c => c.姓名 === task.目标);
+                        if (!target) {
+                            // 目标不存在，任务结束
+                            doctor.当前任务 = null;
+                            gameState.太医列表[index] = doctor;
+                            return;
+                        }
+
+                        // 计算成功概率
+                        const successRate = calculatePoisonSuccessRate(doctor, target);
+                        const isSuccess = Math.random() * 100 < successRate;
+
+                        if (isSuccess) {
+                            // 下毒成功
+                            addMonthEvent(`太医${doctor.姓名}成功对${task.目标}下毒！`);
+
+                            // 记录中毒状态（在月终总结时处理）
+                            if (!gameState.中毒记录) gameState.中毒记录 = [];
+                            gameState.中毒记录.push({
+                                中毒者: task.目标,
+                                下毒者: gameState.玩家详细信息.姓名,
+                                执行太医: doctor.姓名,
+                                被发现概率: calculatePoisonDiscoveryRate(doctor, target)
+                            });
+
+                            // 任务完成，召回太医
+                            doctor.当前任务 = null;
+                            gameState.太医列表[index] = doctor;
+
+                            // 显示成功提示（延迟到返回主界面时）
+                            setTimeout(() => {
+                                if (document.getElementById('main-game-screen').classList.contains('hidden')) return;
+                                alert(`${task.目标}已成功服下太医${doctor.姓名}精心准备的毒药！\n${task.目标}感觉头脑一阵晕眩，已传太医查看……`);
+                            }, 500);
+                        } else {
+                            addMonthEvent(`太医${doctor.姓名}尝试对${task.目标}下毒未成功，剩余${task.剩余行动点}次机会`);
+
+                            // 扣除本次尝试费用
+                            const currentMoney = gameState.玩家详细信息.银两 || 0;
+                            if (currentMoney >= 10) {
+                                gameState.玩家详细信息.银两 = currentMoney - 10;
+                                addMonthEvent(`支付太医${doctor.姓名}下毒费用：10两`);
+                            } else {
+                                // 银两不足，自动召回
+                                addMonthEvent(`银两不足支付下毒费用，太医${doctor.姓名}已自动召回`);
+                                doctor.当前任务 = null;
+                                gameState.太医列表[index] = doctor;
+                            }
+                        }
+
+                        // 更新任务状态
+                        gameState.太医列表[index] = doctor;
+                    }
+
+                    // 如果行动点用完，任务自动结束
+                    if (task.剩余行动点 <= 0) {
+                        doctor.当前任务 = null;
+                        gameState.太医列表[index] = doctor;
+                        addMonthEvent(`太医${doctor.姓名}的下毒任务已结束（机会用尽）`);
+                    }
+                }
+            });
+        }
+
+        // === 月终总结时处理中毒事件 ===
+        function processPoisonEventsInSummary() {
+            if (!gameState.中毒记录 || gameState.中毒记录.length === 0) return;
+
+            let summaryHtml = '';
+
+            gameState.中毒记录.forEach(record => {
+                const target = gameState.妃嫔信息.find(c => c.姓名 === record.中毒者);
+                if (!target) return;
+
+                // 判断是否被发现
+                const isDiscovered = Math.random() * 100 < record.被发现概率;
+
+                if (isDiscovered) {
+                    // 被发现
+                    const healthDecrease = Math.floor(Math.random() * 6) + 5; // 5-10点
+                    target.健康值 = (target.健康值 || 100) - healthDecrease;
+                    target.健康值 = Math.max(0, target.健康值);
+
+                    // 记录事件
+                    gameState.events_log.push({
+                        time: `${gameState.current_year}年${gameState.current_month}月`,
+                        content: `【下毒败露】${gameState.玩家详细信息.姓名}对${record.中毒者}下毒被发现！${record.中毒者}已将此事告发给皇上！`
+                    });
+
+                    // 皇上好感度大幅下降
+                    gameState.初始好感度信息["皇上"] = (gameState.初始好感度信息["皇上"] || 0) - 50;
+
+                    summaryHtml += `
+                        <div class="bg-red-50 border border-red-200 rounded p-3 mb-2">
+                            <p class="font-bold text-red-800">⚠️ 下毒败露</p>
+                            <p class="text-sm">你对${record.中毒者}下毒一事已被发现！</p>
+                            <p class="text-xs text-red-600">皇上好感度-50，${record.中毒者}健康值-${healthDecrease}</p>
+                        </div>
+                    `;
+                } else {
+                    // 未被发现
+                    const healthDecrease = Math.floor(Math.random() * 6) + 5; // 5-10点
+                    target.健康值 = (target.健康值 || 100) - healthDecrease;
+                    target.健康值 = Math.max(0, target.健康值);
+
+                    summaryHtml += `
+                        <div class="bg-green-50 border border-green-200 rounded p-3 mb-2">
+                            <p class="font-bold text-green-800">✅ 下毒成功</p>
+                            <p class="text-sm">成功对${record.中毒者}下毒且未被发现</p>
+                            <p class="text-xs text-green-600">${record.中毒者}健康值-${healthDecrease}</p>
+                        </div>
+                    `;
+                }
+
+                // 检查是否死亡
+                if (target.健康值 <= 0) {
+                    target.已消亡 = true;
+                    target.消亡类型 = '中毒身亡';
+                    target.消亡原因 = '中毒身亡';
+
+                    gameState.events_log.push({
+                        time: `${gameState.current_year}年${gameState.current_month}月`,
+                        content: `【中毒身亡】${record.中毒者}中毒身亡`
+                    });
+                }
+            });
+
+            // 清空中毒记录
+            gameState.中毒记录 = [];
+
+            // 将中毒处理结果添加到月终总结
+            if (summaryHtml) {
+                const summaryDiv = document.getElementById('summary-content');
+                if (summaryDiv) {
+                    const poisonSection = document.createElement('div');
+                    poisonSection.id = 'summary-poison';
+                    poisonSection.className = 'bg-white/60 p-4 rounded shadow-sm border border-[#d6cbb0]';
+                    poisonSection.innerHTML = `<h3 class="font-bold text-[#8B0000] mb-2 border-b border-[#d6cbb0] pb-1">☠️ 下毒结果</h3>${summaryHtml}`;
+
+                    // 插入到总结评语之前
+                    const commentDiv = document.getElementById('summary-comment').parentElement;
+                    commentDiv.parentElement.insertBefore(poisonSection, commentDiv);
+                }
+            }
+        }
+
+        // === 初始化兼容性检查 ===
+        function initializeCompatibility() {
+            // 确保所有妃嫔有健康值属性
+            gameState.妃嫔信息.forEach(concubine => {
+                if (concubine.健康值 === undefined) {
+                    concubine.健康值 = 100;
+                }
+            });
+
+            // 确保玩家有健康值属性
+            if (gameState.玩家详细信息.各项属性.健康值 === undefined) {
+                gameState.玩家详细信息.各项属性.健康值 = 100;
+            }
+
+            // 确保玩家有银两属性
+            if (gameState.玩家详细信息.银两 === undefined) {
+                gameState.玩家详细信息.银两 = 100; // 初始银两
+            }
+
+            // 确保所有太医有任务属性
+            gameState.太医列表.forEach(doctor => {
+                if (doctor.当前任务 === undefined) {
+                    doctor.当前任务 = null;
+                }
+            });
+
+            // 初始化中毒记录
+            if (!gameState.中毒记录) {
+                gameState.中毒记录 = [];
+            }
+        }
+
+        function afterActionPointConsumed() {
+            processDoctorTasks(true); // true 表示是行动点消耗触发的处理
+            updateUI(); // 更新银两显示
         }
     </script>
 </body>
