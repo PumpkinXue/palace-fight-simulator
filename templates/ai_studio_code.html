@@ -1285,7 +1285,7 @@
                     剩余行动点: gameState.action_points
                 };
 
-                const response = await fetch('http://127.0.0.1:5000/generate_location_event', {
+                const response = await fetch('/generate_location_event', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestData)
@@ -1521,7 +1521,7 @@
                     当前月份: endingMonth
                 };
 
-                const response = await fetch('http://127.0.0.1:5000/monthly_summary', {
+                const response = await fetch('/monthly_summary', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestData)
@@ -1860,7 +1860,7 @@
         // === 选秀相关 ===
         async function generateOtherCandidates() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/generate_other_candidates', {
+                const response = await fetch('/generate_other_candidates', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -2116,7 +2116,7 @@
         async function triggerAutomaticDraft() {
             if (gameState.new_draft_candidates.length > 0 && gameState.current_month !== 1) return;
             try {
-                const response = await fetch('http://127.0.0.1:5000/generate_other_candidates', {
+                const response = await fetch('/generate_other_candidates', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -2352,7 +2352,7 @@
                 剩余行动点: gameState.action_points
             };
 
-            fetch('http://127.0.0.1:5000/generate_location_event', {
+            fetch('/generate_location_event', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(requestData)
@@ -2431,7 +2431,7 @@
                     互动类型: interactionType
                 };
 
-                const response = await fetch('http://127.0.0.1:5000/generate_six_palaces_event', {
+                const response = await fetch('/generate_six_palaces_event', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestData)
@@ -2608,7 +2608,7 @@
                     情况分类: situation
                 };
 
-                const response = await fetch('http://127.0.0.1:5000/generate_heartroom_event', {
+                const response = await fetch('/generate_heartroom_event', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestData)
@@ -2859,7 +2859,7 @@
                     当前时间: `${gameState.current_year}年${gameState.current_month}月`
                 };
 
-                const response = await fetch('http://127.0.0.1:5000/generate_heartroom_inside_result', {
+                const response = await fetch('/generate_heartroom_inside_result', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(requestData)
@@ -3070,7 +3070,7 @@
                 // 显示生成状态，禁用太医列表按钮
                 showDoctorGeneratingStatus(true);
                 try {
-                    const response = await fetch('http://127.0.0.1:5000/generate_doctors', {
+                    const response = await fetch('/generate_doctors', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
@@ -3484,7 +3484,7 @@
             document.getElementById('hospital-result').classList.add('hidden');
 
             // 调用后端生成随机事件
-            fetch('http://127.0.0.1:5000/generate_hospital_event', {
+            fetch('/generate_hospital_event', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -3528,7 +3528,7 @@
             document.getElementById('hospital-loading').classList.remove('hidden');
             document.getElementById('hospital-result').classList.add('hidden');
 
-            fetch('http://127.0.0.1:5000/doctor_learn_medicine', {
+            fetch('/doctor_learn_medicine', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -3571,7 +3571,7 @@
             document.getElementById('hospital-loading').classList.remove('hidden');
             document.getElementById('hospital-result').classList.add('hidden');
 
-            fetch('http://127.0.0.1:5000/doctor_recruit', {
+            fetch('/doctor_recruit', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -3614,7 +3614,7 @@
             document.getElementById('hospital-loading').classList.remove('hidden');
             document.getElementById('hospital-result').classList.add('hidden');
 
-            fetch('http://127.0.0.1:5000/doctor_sow_discord', {
+            fetch('/doctor_sow_discord', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
