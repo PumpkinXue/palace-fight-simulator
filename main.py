@@ -2090,7 +2090,7 @@ import time
 # 保活函数：每隔3分钟访问一次自己的链接，防止休眠
 def keep_alive():
     # 把下面的链接 替换成 你自己的Replit外部链接！！！
-    url = "https://palace-simulater--w1203864.replit.app"
+    url = "https://palace-simulator.onrender.com"
     while True:
         try:
             requests.get(url)
