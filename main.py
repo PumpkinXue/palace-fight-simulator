@@ -1,7 +1,7 @@
 # coding=utf-8
 # Please install OpenAI SDK first: `pip3 install openai`
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from openai import OpenAI
 import json
@@ -13,6 +13,11 @@ CORS(app)
 client = OpenAI(
     api_key='sk-018076cf6ec64e018af8c59d96f963bd',
     base_url="https://api.deepseek.com")
+
+@app.route('/')
+def index():
+    # 渲染templates文件夹下的ai_studio_code.html
+    return render_template('ai_studio_code.html')
 
 SYSTEM_PROMPT_1 = """你是古代宫廷生活背景生成器，你需要根据玩家选择的身世和性格，随机生成一份王朝背景，帮助玩家展开丰富的宫廷生活。
 注意：所有信息均采用随机生成，不要与示例相同，妃嫔可以生成0~5个，皇后可有可无，若有则应该放在第一个介绍、玩家个人信息包括姓名均随机生成。所有数值类属性上限均为100.
