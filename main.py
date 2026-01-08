@@ -12,8 +12,8 @@ app = Flask('ai_studio_code')
 CORS(app)
 
 client = OpenAI(
-    api_key=os.environ.get("DEEPSEEK_API_KEY"),  # 自定义环境变量名
-    base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")  # 设默认值)
+    api_key='sk-018076cf6ec64e018af8c59d96f963bd',
+    base_url="https://api.deepseek.com")
 
 @app.route('/')
 def index():
