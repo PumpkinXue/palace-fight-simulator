@@ -1067,7 +1067,7 @@
             showAILoading(); // 【注入】显示Loading
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/start_game', {
+                const response = await fetch('/start_game', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ identity: '秀女', personality: pers })
@@ -1136,7 +1136,7 @@
             storyArea.innerHTML = ''; 
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/start_game', {
+                const response = await fetch('/start_game', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ ...gameState, is_palace_selection: true })
