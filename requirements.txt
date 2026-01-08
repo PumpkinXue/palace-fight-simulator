@@ -1,8 +1,11 @@
-# Python版本建议：3.8+
-flask==2.3.3
+# 基础Flask依赖
+Flask==2.3.3
 flask-cors==4.0.0
-openai==1.3.7
+# 关键：锁定OpenAI和httpx版本（解决proxies参数冲突）
+openai==1.13.3
+httpx==0.25.2
+# 其他依赖
 requests==2.31.0
+python-dotenv==1.0.0
 gunicorn==21.2.0
 
-python-dotenv==1.0.0  # 可选，用于管理环境变量（如API Key）
