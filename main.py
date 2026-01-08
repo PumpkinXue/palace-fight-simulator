@@ -1,7 +1,7 @@
 # coding=utf-8
 # Please install OpenAI SDK first: `pip3 install openai`
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from openai import OpenAI
 import json
